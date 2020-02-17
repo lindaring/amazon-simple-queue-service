@@ -1,4 +1,4 @@
-package com.lindaring.example;
+package com.lindaring.example.service;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import org.junit.Assert;
@@ -21,6 +21,9 @@ public class SQSTest {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private SQSService sqsService;
+
     private AmazonSQS sqsClient;
 
     @Before
@@ -32,6 +35,11 @@ public class SQSTest {
     public void CAN_CREATE_QUEUE() {
         String queueUrl = sqsClient.createQueue(QUEUE_NAME).getQueueUrl();
         Assert.assertTrue(sqsClient.listQueues().getQueueUrls().contains(queueUrl));
+    }
+
+    @Test
+    public void CAN_SEND_QUEUE_MESSAGE() {
+        sqsService.sendQueueMessage("Way to go!");
     }
 
 }

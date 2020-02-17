@@ -1,18 +1,26 @@
-package com.lindaring.example;
+package com.lindaring.example.service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.amazonaws.services.sqs.model.CreateQueueRequest;
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
 @Service
-public class MySQSService {
+public class SQSService {
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    private AmazonSQS sqsClient;
 
     @Value("${sqs.url}")
     private String sqsURL;
@@ -20,14 +28,8 @@ public class MySQSService {
     public boolean sendQueueMessage(String notificationData) {
         boolean sent = false;
         try {
-            final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
             log.info("Sending a message to MyQueue.\n");
-//            sqs.createQueue("")
-//            sqs.setEndpoint("http://localhost:4576/123456789012/test_queue");
-//            sqs.createQueue("test_queue");
-            CreateQueueRequest createQueueRequest = new CreateQueueRequest("test_queue");
-            sqs.createQueue(createQueueRequest);
-            sqs.sendMessage(new SendMessageRequest(sqsURL, notificationData));
+            sqsClient.sendMessage(new SendMessageRequest(sqsURL, notificationData));
             log.info("Message Sent.\n");
             sent = true;
         } catch (final AmazonServiceException ase) {
@@ -47,6 +49,24 @@ public class MySQSService {
             log.error("Error Message: " + ace.getMessage());
         }
         return sent;
+    }
+
+    public String readQueueMessage() {
+        while (true) {
+            log.info("Receiving messages from MyQueue.\n");
+
+            final ReceiveMessageRequest receiveMessageRequest =
+                    new ReceiveMessageRequest(sqsURL)
+                            .withMaxNumberOfMessages(1)
+                            .withWaitTimeSeconds(3);
+
+            log.info("Message: " + sqsClient.receiveMessage(receiveMessageRequest).getMessages());
+        }
+    }
+
+    @PostConstruct
+    private void init() {
+        sqsClient = (AmazonSQS) applicationContext.getBean("SQSClient");
     }
 
 }
