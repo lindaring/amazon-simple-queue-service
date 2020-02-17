@@ -1,30 +1,37 @@
 package com.lindaring.example;
 
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
-public class SQSTest extends BaseIntegrationTest {
+@ActiveProfiles("junit")
+@RunWith(SpringRunner.class)
+public class SQSTest {
+
+    private final String QUEUE_NAME = "unit-test-queue";
 
     @Autowired
-    private MySQSService mySQSService;
+    private ApplicationContext applicationContext;
+
+    private AmazonSQS sqsClient;
+
+    @Before
+    public void setup() {
+        sqsClient = (AmazonSQS) applicationContext.getBean("SQSClient");
+    }
 
     @Test
-    public void firstTest() {
-        final AmazonSQS sqs = AmazonSQSClient
-                .builder()
-                .withEndpointConfiguration(BaseIntegrationTest.localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
-                .withCredentials(BaseIntegrationTest.localStackContainer.getDefaultCredentialsProvider()).build();
-        String mainQueueURL = sqs.createQueue("Main").getQueueUrl();
-        Assert.assertTrue(sqs.listQueues().getQueueUrls().contains(mainQueueURL));
+    public void CAN_CREATE_QUEUE() {
+        String queueUrl = sqsClient.createQueue(QUEUE_NAME).getQueueUrl();
+        Assert.assertTrue(sqsClient.listQueues().getQueueUrls().contains(queueUrl));
     }
 
 }
