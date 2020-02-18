@@ -1,0 +1,24 @@
+server:
+  port: 8090
+
+spring:
+  profiles:
+    active: test
+
+---
+spring:
+  profiles: prod
+
+sqs:
+  protocol: HTTPS
+  host: random.url
+  port: 80
+
+---
+spring:
+  profiles: test
+
+sqs:
+  protocol: HTTP
+  host: localhost
+  port: 4576
