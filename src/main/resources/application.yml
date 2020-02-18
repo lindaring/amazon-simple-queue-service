@@ -5,6 +5,10 @@ spring:
   profiles:
     active: test
 
+sqs:
+  queues:
+    create-person: create-person-queue
+
 ---
 spring:
   profiles: prod

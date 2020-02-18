@@ -4,6 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import com.lindaring.example.model.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
@@ -12,19 +13,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class PersonService {
 
-    public static final String CREATE_PERSON_REQUESTS = "create_person_queue";
+    @Value("${sqs.queues.create-person}")
+    private String createPersonQueue;
 
     @Autowired
     protected JmsTemplate defaultJmsTemplate;
 
     public void initPersonCreation(Person person) {
         log.info("Initializing create person...");
-        defaultJmsTemplate.convertAndSend(CREATE_PERSON_REQUESTS, person.toJSON(person));
+        defaultJmsTemplate.convertAndSend(createPersonQueue, person.toJSON(person));
     }
 
-    @JmsListener(destination = CREATE_PERSON_REQUESTS)
+    @JmsListener(destination = "${sqs.queues.create-person}")
     public void createPerson(String request) {
-        log.info("Receiving create person request..." + request);
+        log.info("Receiving create person request...\n" + request);
         try {
             Person person = Person.fromJSON(request);
             log.info(String.format("Person [%s] has been created.", person.getFirstName()));
