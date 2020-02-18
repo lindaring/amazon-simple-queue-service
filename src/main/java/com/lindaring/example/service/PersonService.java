@@ -1,5 +1,6 @@
 package com.lindaring.example.service;
 
+import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.google.gson.JsonSyntaxException;
 import com.lindaring.example.model.Person;
 import lombok.extern.slf4j.Slf4j;

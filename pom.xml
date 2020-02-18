@@ -68,6 +68,22 @@
 			<artifactId>localstack</artifactId>
 			<version>1.11.1</version>
 		</dependency>
+		<dependency>
+			<groupId>cloud.localstack</groupId>
+			<artifactId>localstack-utils</artifactId>
+			<version>0.1.16</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sqs</artifactId>
+			<version>1.11.723</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sqs</artifactId>
+			<version>2.4.8</version>
+		</dependency>
 	</dependencies>
 
 	<build>
