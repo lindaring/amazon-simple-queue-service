@@ -19,7 +19,7 @@ public class Person {
         return new GsonBuilder().create().fromJson(json, Person.class);
     }
 
-    public String toJSON(Person person) {
+    public static String toJSON(Person person) {
         return new Gson().toJson(person);
     }
 }

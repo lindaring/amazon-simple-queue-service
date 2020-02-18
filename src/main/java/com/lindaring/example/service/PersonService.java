@@ -22,7 +22,7 @@ public class PersonService {
 
     public void initPersonCreation(Person person) {
         log.info("Initializing create person...");
-        defaultJmsTemplate.convertAndSend(createPersonQueue, person.toJSON(person));
+        defaultJmsTemplate.convertAndSend(createPersonQueue, Person.toJSON(person));
     }
 
     @JmsListener(destination = "${sqs.queues.create-person}")
