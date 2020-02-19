@@ -6,7 +6,6 @@ import com.amazonaws.Protocol;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQSClient;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,44 +15,21 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 
 import javax.jms.Session;
 
-@EnableJms
+@Profile("local")
 @Configuration
-@Getter
-public class JmsConfig {
+@EnableJms
+public class JmsConfigLocal {
 
     @Value("${sqs.protocol}") private String protocol;
     @Value("${sqs.host}") private String host;
     @Value("${sqs.port}") private int port;
 
-    @Bean
-    @Profile("test")
-    SQSConnectionFactory getTestConnectionFactory() {
-        LocalStackContainer localStackContainer = new LocalStackContainer().withServices(LocalStackContainer.Service.SQS);
-        localStackContainer.start();
-
-        String endpoint = localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS).getServiceEndpoint();
-        String region = localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS).getSigningRegion();
-
-        protocol = endpoint.substring(0, endpoint.indexOf(":"));
-        host = endpoint.substring(endpoint.indexOf("//") + 2, endpoint.lastIndexOf(":"));
-        port = Integer.parseInt(endpoint.substring(endpoint.lastIndexOf(":") + 1));
-
-        ClientConfiguration clientConfiguration = new ClientConfiguration();
-        clientConfiguration.setProtocol(Protocol.valueOf(protocol.toUpperCase()));
-        clientConfiguration.setProxyHost(host);
-        clientConfiguration.setProxyPort(port);
-
-        return SQSConnectionFactory.builder()
-                .withClientConfiguration(clientConfiguration)
-                .withRegion(Region.getRegion(Regions.valueOf(region.toUpperCase().replaceAll("-","_"))))
-                .withAWSCredentialsProvider(new DefaultAWSCredentialsProviderChain())
-                .build();
-    }
-
+    /**
+     * Expects to have a LocalStack instance already running on localhost. It attempts to connect to that instance.
+     */
     @Bean
     @Profile("local")
     SQSConnectionFactory getLocalConnectionFactory() {
@@ -70,20 +46,11 @@ public class JmsConfig {
     }
 
     @Bean
-    @Profile("prod")
-    SQSConnectionFactory getDevConnectionFactory() {
-        return SQSConnectionFactory.builder()
-                .withRegion(Region.getRegion(Regions.EU_WEST_1))
-                .withAWSCredentialsProvider(new DefaultAWSCredentialsProviderChain())
-                .build();
-    }
-
-    @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(SQSConnectionFactory sqsConnectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(sqsConnectionFactory);
         factory.setDestinationResolver(new DynamicDestinationResolver());
-        factory.setConcurrency("3-10");
+        factory.setConcurrency("1");
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         return factory;
     }

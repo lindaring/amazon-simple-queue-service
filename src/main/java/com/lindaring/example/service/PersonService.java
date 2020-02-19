@@ -1,6 +1,5 @@
 package com.lindaring.example.service;
 
-import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.google.gson.JsonSyntaxException;
 import com.lindaring.example.model.Person;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +17,11 @@ public class PersonService {
     private String createPersonQueue;
 
     @Autowired
-    protected JmsTemplate defaultJmsTemplate;
+    protected JmsTemplate jmsTemplate;
 
     public void initPersonCreation(Person person) {
         log.info("Initializing create person...");
-        defaultJmsTemplate.convertAndSend(createPersonQueue, Person.toJSON(person));
+        jmsTemplate.convertAndSend(createPersonQueue, Person.toJSON(person));
     }
 
     @JmsListener(destination = "${sqs.queues.create-person}")

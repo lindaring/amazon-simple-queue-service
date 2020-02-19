@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    active: test
+    active: local
 
 sqs:
   queues:
@@ -13,16 +13,15 @@ sqs:
 spring:
   profiles: prod
 
-sqs:
-  protocol: HTTPS
-  host: random.url
-  port: 80
-
 ---
 spring:
-  profiles: test
+  profiles: local
 
 sqs:
   protocol: HTTP
   host: localhost
   port: 4576
+
+---
+spring:
+  profiles: test
