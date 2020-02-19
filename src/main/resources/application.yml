@@ -1,27 +1,7 @@
 server:
   port: 8090
 
-spring:
-  profiles:
-    active: local
-
-sqs:
-  queues:
-    create-person: create-person-queue
-
----
-spring:
-  profiles: prod
-
----
-spring:
-  profiles: local
-
-sqs:
-  protocol: HTTP
-  host: localhost
-  port: 4576
-
----
-spring:
-  profiles: test
+localstack:
+  enabled: true
+  sqs:
+    enabled: true
